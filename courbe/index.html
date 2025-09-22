@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pondération du BI ✨</title>
+<style>
+*{outline:none;}
+body{
+background-color:black;
+color:white;
+font-family:arial;
+}
+center{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+}
+input{
+border:white solid .25em;
+background-color:#444;
+padding:1em;
+color:white;
+text-align:center;
+font-size:.70em;
+border-radius:5px;
+}
+h1{
+transition:.5s;
+font-size:3.5em;
+}
+</style>
+</head>
+<body>
+<center>
+<h1 id="ponderated">Passin'?</h1>
+<input type="number" placeholder="47.5" id="grade" min="0" max="100" step="any">
+</center>
+<script>
+function ponderate(x){if(x>=0&&x<=47.5)return +(1.1579*x);if(x>47.5&&x<=90)return +(55+0.9412*(x-47.5));if(x>90&&x<=95)return +(95+0.8*(x-90));if(x>95&&x<=100)return +(99+0.2*(x-95)).toFixed(2);return null;}
+function getColor(val){
+max=47.5;
+if(val<0)val=0;
+if(val>max)val=max;
+var g=Math.round(255*(val/max));
+var r=255-g;
+return"#"+((1<<24)+(r<<16)+(g<<8)).toString(16).slice(1);
+}
+var input=document.querySelector("#grade");
+var ponderated=document.querySelector("#ponderated");
+input.addEventListener("change",()=>{
+if(input.value==="")return;
+input.value=Math.min(100,Math.max(0,parseFloat(input.value)));
+});
+function changeTheThingy(){
+ponderated.innerText=`${ponderate(input.value).toFixed(2)}`;
+ponderated.style.color=getColor(input.value-52.5);
+}
+input.addEventListener("change",e=>{changeTheThingy();});
+input.addEventListener("input",e=>{changeTheThingy();});
+</script>
+<h5 style="font-family:verdana;position:absolute;bottom:10px;right:10px;margin:0;background-color:#222;border-radius:5px;padding:5px 5px 5px 8px;border:white solid 1px;opacity:.6;z-index:9999999999;pointer-events:none;">Made by NotLeonid ✨</h5>
+</body>
+</html>
