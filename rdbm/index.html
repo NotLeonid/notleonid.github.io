@@ -1,0 +1,160 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>RD Board Maker</title>
+<style>
+*{user-select:none;}
+html,body{overscroll-behavior-y:contain;}
+body{background-color:black;color:white;font-family:arial;}
+hr{color:white;width:80%;border-radius:10px;border:white solid 1px;}
+#board,#deck{border:none;border-radius:10px;padding:10px;width:45vw;height:calc(45vw/5*3);}
+#deck{height:calc(45vw/5);}
+table{margin:0px;width:100%;height:100%;background-color:white;position:relative;top:0px;left:0px;}
+table,th,td{border:solid white 1px;border-radius:5px;}
+th,td{padding:0px;text-align:left;background-color:#222;font-family:arial;overflow:hidden;padding:0px;}
+th{width:20%;height:100%;}
+#board th{height:calc(100%/3);}
+body center{width:100%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
+th img{width:100%;max-height:100%;aspect-ratio:1;object-fit:cover;}
+th select{width:100%;border:none;background-color:#888;color:white;}
+@media(orientation:portrait){
+#board,#deck{width:90vw;height:calc(100vw/5*3);}
+}
+</style>
+</head>
+<body>
+<center>
+<div id="deck">
+<table>
+<tr>
+<th><select id="deck1s"></select></th>
+<th><select id="deck2s"></select></th>
+<th><select id="deck3s"></select></th>
+<th><select id="deck4s"></select></th>
+<th><select id="deck5s"></select></th>
+<tr>
+<tr><th id="deck1"><img src="."></th><th id="deck2"><img src="."></th><th id="deck3"><img src="."></th><th id="deck4"><img src="."></th><th id="deck5"><img src="."></th></tr>
+</table>
+</div>
+<br><br>
+<div id="board">
+<table>
+<tr><th id="slot1"><img src="."></th><th id="slot2"><img src="."></th><th id="slot3"><img src="."></th><th id="slot4"><img src="."></th><th id="slot5"><img src="."></th></tr>
+<tr><th id="slot6"><img src="."></th><th id="slot7"><img src="."></th><th id="slot8"><img src="."></th><th id="slot9"><img src="."></th><th id="slot10"><img src="."></th></tr>
+<tr><th id="slot11"><img src="."></th><th id="slot12"><img src="."></th><th id="slot13"><img src="."></th><th id="slot14"><img src="."></th><th id="slot15"><img src="."></th></tr>
+</table>
+</div>
+</center>
+<script>
+var xmlHttp=new XMLHttpRequest();
+xmlHttp.open("GET","dice",false);
+xmlHttp.send(null);
+var ret=xmlHttp.responseText;
+var dc=document.createElement("html");
+dc.innerHTML=ret;
+dc.querySelectorAll("a").forEach(a=>{
+if(a.innerText=="..")return;
+var name=a.innerText.substring(0,a.innerText.length-4)
+for(i=1;i<5+1;i++){
+var option=document.createElement("option");
+option.innerText=`${name}`;
+document.querySelector(`#deck${i}s`).appendChild(option);
+}
+for(i=1;i<5+1;i++){
+var items=document.querySelectorAll(`#deck${i}s option`);
+var item=items[Math.floor(Math.random()*items.length)];
+item.selected=true;
+}
+});
+
+var fromDeck=false;
+var old;
+var transferData;
+var elem;
+for(i=1;i<5+1;i++){
+document.querySelector(`#deck${i}`).addEventListener("touchstart",e=>{
+transferData=e.target;
+});
+document.querySelector(`#deck${i}`).addEventListener("touchmove",e=>{
+let touch=e.touches[0];
+elem=document.elementFromPoint(touch.clientX,touch.clientY);
+});
+document.querySelector(`#deck${i}`).addEventListener("touchend",e=>{
+if(elem.tagName.toLowerCase()=="img"){
+elem.src=transferData.src;
+}else{
+elem.children[0].src=transferData.src;
+}
+update();
+});
+document.querySelector(`#deck${i}`).ondragover=function(e){e.preventDefault();};
+document.querySelector(`#deck${i}s`).addEventListener("change",update);
+document.querySelector(`#deck${i} img`).style.draggable=true;
+document.querySelector(`#deck${i} img`).ondragstart=function(e){fromDeck=true;e.dataTransfer.setData("Text",e.target.src);};
+document.querySelector(`#deck${i}`).ondrop=function(e){
+e.preventDefault();
+if(!fromDeck&&old)old.src=".";
+update();
+};
+var box=document.querySelector(`#deck${i} img`);
+box.addEventListener("touchmove",function(e){var touchLocation=e.targetTouches[0];box.style.left=touchLocation.pageX+"px";box.style.top=touchLocation.pageY+"px";});
+}
+for(i=1;i<15+1;i++){
+document.querySelector(`#slot${i} img`).addEventListener("touchstart",e=>{
+transferData=e.target;
+});
+document.querySelector(`#slot${i} img`).addEventListener("touchmove",e=>{
+let touch=e.touches[0];
+elem=document.elementFromPoint(touch.clientX,touch.clientY);
+});
+document.querySelector(`#slot${i} img`).addEventListener("touchend",e=>{
+var oldd="";
+if(elem.tagName.toLowerCase()=="img"){
+oldd=elem.src;
+elem.src=transferData.src;
+}else{
+oldd=elem.children[0].src;
+elem.children[0].src=transferData.src;
+}
+transferData.src=oldd;
+});
+
+document.querySelector(`#slot${i} img`).ondragstart=function(e){fromDeck=false;e.dataTransfer.setData("Text",e.target.src);old=e.target;};
+document.querySelector(`#slot${i} img`).onload=function(){this.style.display='';};
+document.querySelector(`#slot${i} img`).onerror=function(){this.style.display='none';};
+document.querySelector(`#slot${i}`).ondrop=function(e){
+e.preventDefault();
+if(!fromDeck&&old)old.src=this.children[0].src;
+this.children[0].src=e.dataTransfer.getData("Text");
+update();
+};
+document.querySelector(`#slot${i}`).ondragover=function(e){e.preventDefault();};
+}
+function update(save){
+var preset=new URLSearchParams(window.location.search);
+var names=[];
+for(i=1;i<5+1;i++){
+var dice=document.querySelector(`#deck${i}s`).value;
+document.querySelector(`#deck${i} img`).src=`dice/${dice}.png`;
+preset.set(`d${i}`,`${dice}`);
+names.push(dice.substring(0,3));
+}
+for(i=1;i<15+1;i++){
+try{var dice=document.querySelector(`#slot${i} img`).src.split("/").pop().split(".").shift();preset.set(`b${i}`,`${dice}`);}catch(e){console.error(e);}
+}
+document.title=`${names.join("")} [RDBM]`;
+if(!save)window.history.pushState(null,null,`?${preset.toString()}`);
+}
+function presetLoad(){
+var preset=new URLSearchParams(window.location.search);
+for(i=1;i<5+1;i++){name=preset.get(`d${i}`);if(name&&name!="null")document.querySelector(`#deck${i}s`).value=name;}
+for(i=1;i<15+1;i++){name=preset.get(`b${i}`);if(name&&name!="null")document.querySelector(`#slot${i} img`).src=`dice/${name}.png`;}
+update(true);
+}
+window.addEventListener("popstate",function(event){presetLoad();});
+presetLoad();
+</script>
+<h5 style="font-family:verdana;position:absolute;bottom:10px;right:10px;margin:0;background-color:#222;border-radius:5px;padding:5px 5px 5px 8px;border:white solid 1px;opacity:.6;z-index:9999999999;pointer-events:none;">Made by NotLeonid 😘</h5>
+</body>
+</html>
