@@ -44,6 +44,27 @@ input{
 h1{
   transition:.5s;
   font-size:3.5em;
+  margin-bottom:0;
+}
+@keyframes rotate{
+  0%{transform:rotateX(0deg);}
+  50%{color:#0f0;}
+  100%{transform:rotateX(360deg);}
+}
+@keyframes rotate2{
+  0%{transform:rotateX(0deg);}
+  100%{transform:rotateX(360deg);}
+}
+h4{
+  transition:.5s;
+  font-size:100%;
+  margin-top:0;
+}
+.flip{
+  animation:rotate 0.45s ease-out 1;
+}
+.flip2{
+  animation:rotate2 0.45s ease-out 1;
 }
 label{user-select:none;}
 </style>
@@ -51,11 +72,12 @@ label{user-select:none;}
 <body>
 <center>
 <h1 id="ponderated">Passin'?</h1>
+<h4 id="subtext">*drum rolls*</h4>
 <input type="number" placeholder="47.5" id="grade" min="0" max="100" step="any">
 </center>
 <h5 style="color:light-dark(black,white);font-family:verdana;position:absolute;bottom:10px;right:10px;margin:0;background-color:light-dark(#ddd,#222);border-radius:5px;padding:5px 5px 5px 8px;border:light-dark(black,white) solid 1px;opacity:.6;z-index:9999999999;pointer-events:none;">Made by NotLeonid ✨</h5>
 <div style="position:absolute;top:10px;right:10px;">
-  <img loading="lazy" src="https://visitor-badge.laobi.icu/badge?page_id=notleonid.github.io%2Fcourbe&right_color=%231285bf"/>
+  <img loading="lazy" src="https://visitor-badge.laobi.icu/badge?page_id=page.id&right_color=%231285bf"/>
   <br>
   <input type="checkbox" id="theme" checked><label for="theme">Dark theme</label>
 </div>
@@ -69,7 +91,30 @@ label{user-select:none;}
   var r=255-g;
   return"#"+((1<<24)+(r<<16)+(g<<8)).toString(16).slice(1);
   }
-  function changeTheThingy(){ponderated.innerText=`${ponderate(input.value).toFixed(2)}`;ponderated.style.color=getColor(input.value-52.5);}
+  function changeTheThingy(){
+    var pondered=ponderate(input.value).toFixed(2);
+    // ponderated.innerText=`${isNaN(parseFloat(input.value).toFixed(2))?"0.00":parseFloat(input.value).toFixed(2)}`;
+    ponderated.innerText=`${pondered}`;
+    ponderated.style.color=getColor(input.value-52.5);
+    var newSubtext=`+${(pondered-input.value).toFixed(2)}%`;
+    if(newSubtext!=subtext.innerText){
+      subtext.classList.add("flip");
+      setTimeout(function(){
+        subtext.innerText=newSubtext;
+        // ponderated.classList.add("flip2");
+        // setTimeout(function(){
+        //   ponderated.innerText=`${pondered}`;
+        //   ponderated.style.color=getColor(input.value-52.5);
+        // },450/2);
+        // setTimeout(function(){
+        //   ponderated.classList.remove("flip2");
+        // },450);
+      },450/2);
+      setTimeout(function(){
+        subtext.classList.remove("flip");
+      },450);
+    }
+  }
   function switchTheme(forced){
     var theme=null;
     if((themeWatcher.matches&&forced===undefined)||forced===true){theme=true;document.documentElement.style.setProperty("color-scheme","light");themeButton.checked=false;}
@@ -79,6 +124,7 @@ label{user-select:none;}
   }
   var input=document.querySelector("#grade");
   var ponderated=document.querySelector("#ponderated");
+  var subtext=document.querySelector("#subtext");
   var themeButton=document.querySelector("#theme");
   var themeWatcher=window.matchMedia("(prefers-color-scheme:light)");
 
